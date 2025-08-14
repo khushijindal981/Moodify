@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Moodify - Emotion Connect</title>
+  <link rel="stylesheet" href="{{url_for('static', filename='css/emotion.css')}}" />
+</head>
+<body>
+  <div class="container">
+    <h2>Welcome to Moodify</h2>
+
+    <div class="mood-selection">
+      <p>Select your mood:</p>
+      <div class="mood-buttons">
+        <button onclick="handleMoodChange('happy')" style="background-color:rgba(255,105,180,0.9) ;">😊 Happy</button>
+        <button onclick="handleMoodChange('sad')" style="background-color:rgba(123,104,238,0.8) ;">😢 Sad</button>
+        <button onclick="handleMoodChange('romantic')" style="background-color:rgba(255,240,245,0.85) ;">❤ Love</button>
+        <button onclick="handleMoodChange('anger')" style="background-color:rgba(255, 0, 0, 0.649) ;">anger</button>
+      </div>
+    </div>
+
+    <div class="quote-box" id="quoteBox">Your emotional quote will appear here...</div>
+    <div id="scoreTable" style="margin-top:30px;"></div>
+
+    <div class="message-box" id="messageBox">Mood message appears here...</div>
+
+    <button class="logout" onclick="logout()">Logout</button>
+  </div>
+  <script>
+    const username = "{{ username }}"; 
+  </script>
+ <script src="{{url_for('static', filename='js/emotion.js')}}"></script>  
+</body>
+</html>
+    

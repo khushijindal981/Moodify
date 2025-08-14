@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Sign Up - Moodify</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='css/auth.css')}}" />
+  </head>
+  <body>
+    <form action="/register" method="POST">
+      <div class="auth-container">
+      <h2>Moodify Sign Up</h2>
+        {% if message %}
+        <p style="color: red;">{{ message }}</p>
+        {% endif %}
+      <input type="email" id="signupEmail" placeholder="Email" name="email" />
+      <input type="text" id="signupname" placeholder="Username" name="username" required/>
+      <input type="password" id="signupPassword" placeholder="Password" name="password" />
+      <button type="submit" onclick="signup()">Sign Up</button>
+      <p>Already have an account? <a href="login">Login</a></p>
+    </div>
+    </form>
+    <script>
+      function signup() {
+        const email = document.getElementById("signupEmail").value;
+        const password = document.getElementById("signupPassword").value;
+        const enteredUsername = document.getElementById("signupname").value;
+        if (email && password) {
+          if (users[email]) {
+            alert("User already exists!");
+          } else {
+            users[email] = password;
+            //localStorage.setItem("users", JSON.stringify(users));
+            alert("Signup successful! Now login.");
+            window.location.href = "login";
+          }
+        } else {
+          alert("Please fill all fields.");
+        }
+       sessionStorage.setItem("username", enteredUsername);
+      }
+    </script>
+  </body>
+</html>

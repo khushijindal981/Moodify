@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Happy Mood - Moodify</title>
+  <link rel="stylesheet" href="{{url_for('static', filename='css/moodstyle.css')}}">
+</head>
+<body class="happy">
+  <div class="container">
+    <h2>😊 Welcome to the Happy Zone</h2>
+    <p class="mood-quote">"Happiness is contagious. Spread it!"</p>
+
+    <div class="game-grid">
+      <div class="game-card" onclick="emojitap()">
+        <img src="{{url_for('static', filename='images/emojitap.jpg')}}" alt="Emoji Tap" />
+        <h3>Emoji Tap</h3>
+      </div>
+      <div class="game-card" onclick="chat()" >
+        <img src="{{url_for('static', filename='images/laugh.jpg')}}" alt="Joke Generator" />
+        <h3 style="color: black;">Joke Generator</h3>
+      </div>
+      <div class="game-card" onclick="teddy()" >
+        <img src="{{url_for('static', filename='images/teddytoss.jpg')}}" alt="teddy toss" />
+        <h3 style="color: black;">🧸PLay With Me</h3>
+      </div>
+    </div>
+
+    <button onclick="emotion()" class="back-btn">🔙 Back to Mood Selection</button>
+   </div>
+   <script>
+    function emojitap() {
+      window.location.href = "emojitap"; 
+    }
+
+    function emotion() {
+      window.location.href = "emotion"; 
+    }
+    function chat() {
+      window.location.href = "chat"; 
+    }
+    function teddy() {
+      window.location.href = "teddy"; 
+    }
+   </script>
+  </body>
+</html>

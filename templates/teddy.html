@@ -1,0 +1,213 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teddy Toss Simulator</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #a0e8ff; }
+    canvas { display: block; background: linear-gradient(to top, #6ec6ff, #ffffff); }
+    #scoreDisplay {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-family: Arial, sans-serif;
+      font-size: 24px;
+      color: #333;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 8px 16px;
+      border-radius: 10px;
+    }
+    #gameOverScreen {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: Arial;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+    }
+    #gameOverScreen button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div id="scoreDisplay">you can jump only once</div>
+  <div id="gameOverScreen">
+    <h2>Game Over!</h2>
+    <p id="finalScore"></p>
+    <button onclick="restartGame()">Play Again</button>
+    <button onclick="window.location.href='/happy'">Back to Home</button>
+  </div>
+  <canvas id="gameCanvas"></canvas>
+  <script>
+    const username = "{{ username }}"; 
+    const gameName = "Jumping Teddy";
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;const teddyIdle = new Image(); teddyIdle.src = "static/images/normalteddy.png";
+    const teddyFlying = new Image(); teddyFlying.src = "static/images/flyteddy.png";
+
+    let backgroundOffset = 0;
+    let score = 0;
+    let gameOver = false;
+
+    let teddy = {
+      x: 500,
+      y: canvas.height - 130,
+      vx: 0,
+      vy: 0,
+      gravity: 0.4,
+      friction: 0.99,
+      img: teddyIdle,
+      flying: false,
+      launched: false
+    };
+
+    let dragging = false;
+    let dragStart = { x: 0, y: 0 };
+    let dragEnd = { x: 0, y: 0 };
+
+    canvas.addEventListener("mousedown", (e) => {
+      if (!teddy.launched && !gameOver) {
+        dragging = true;
+        dragStart = { x: e.clientX, y: e.clientY };
+        dragEnd = { x: e.clientX, y: e.clientY };
+      }
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+      if (dragging) {
+        dragEnd = { x: e.clientX, y: e.clientY };
+      }
+    });
+
+    canvas.addEventListener("mouseup", () => {
+      if (dragging) {
+        dragging = false;
+        const dx = dragStart.x - dragEnd.x;
+        const dy = dragStart.y - dragEnd.y;
+        teddy.vx = -dx * 0.15;
+        teddy.vy = -dy * 0.15;
+        teddy.launched = true;
+        teddy.flying = true;
+        teddy.img = teddyFlying;
+      }
+    });
+    function sendScoreToBackend(username, gameName, score) {
+    fetch('/update_score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            username: username,
+            game_name: gameName,
+            score: score
+        })
+    })
+    .then(res => res.json())
+    .then(data => console.log("Score update:", data))
+    .catch(err => console.error(err));
+    }
+    function showGameOver() {
+      document.getElementById("finalScore").textContent = `You threw teddy ${score} meters!`;
+      document.getElementById("gameOverScreen").style.display = "block";
+      gameOver = true;
+      let finalScore = score; 
+      sendScoreToBackend(username, gameName, finalScore);
+    }
+
+    function restartGame() {
+      teddy.x = 500;
+      teddy.y = canvas.height - 150;
+      teddy.vx = 0;
+      teddy.vy = 0;
+      teddy.launched = false;
+      teddy.flying = false;
+      teddy.img = teddyIdle;
+      backgroundOffset = 0;
+      score = 0;
+      gameOver = false;
+      document.getElementById("scoreDisplay").textContent = "Distance: 0 m";
+      document.getElementById("gameOverScreen").style.display = "none";
+    }
+
+    function update() {
+      if (teddy.launched && !gameOver) {
+        teddy.vy += teddy.gravity;
+        teddy.x += teddy.vx;
+        teddy.y += teddy.vy;
+
+        teddy.vx *= teddy.friction;
+        teddy.vy *= teddy.friction;
+
+        backgroundOffset = -teddy.x + 200;
+
+      if (teddy.y > canvas.height - 100) {
+        teddy.y = canvas.height - 100;
+        teddy.vy = 0;
+        teddy.vx *= 0.95;
+        teddy.flying = false;
+      }
+
+      if (Math.abs(teddy.vx) < 0.5 && !teddy.flying) {
+        teddy.launched = false;
+        teddy.img = teddyIdle;
+        teddy.x = 200 + Math.random() * 200;
+        teddy.y = canvas.height - 150;
+        teddy.vx = 0;
+        teddy.vy = 0;
+        backgroundOffset = 0;
+        showGameOver();
+      }
+
+      score = Math.floor(teddy.x / 10);
+      document.getElementById("scoreDisplay").textContent = `Distance: ${score} m`;
+    }
+  }
+
+  function drawBackground() {
+    ctx.fillStyle = "#a0e8ff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#76d275";
+    ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
+  }
+
+  function drawTeddy() {
+    ctx.drawImage(teddy.img, teddy.x + backgroundOffset - 40, teddy.y - 0, 80, 80);
+  }
+
+function drawAimLine() {
+  if (dragging) {
+    ctx.beginPath();
+    const controlX = (dragStart.x + dragEnd.x) / 2;
+    const controlY = (dragStart.y + dragEnd.y) / 2 - 100;
+    ctx.moveTo(dragStart.x, dragStart.y);
+    ctx.quadraticCurveTo(controlX, controlY, dragEnd.x, dragEnd.y);
+    ctx.strokeStyle = "rgba(0,0,0,0.5)";
+    ctx.setLineDash([5, 5]);
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+}
+
+function gameLoop() {
+  update();
+  drawBackground();
+  drawTeddy();
+  drawAimLine();
+  requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+
+  </script>
+</body>
+</html>

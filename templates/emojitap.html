@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Emoji Tap Game</title>
+<link rel="stylesheet" href="{{url_for('static', filename='css/emojitap.css')}}" />
+</head>
+<body>
+  <div id="scoreBoard">
+    Score: <span id="score">0</span> | Lives: <span id="lives">5</span>|
+</div>
+  </div>
+
+  <div id="gameArea"></div>
+
+  <div id="gameOverScreen">
+    <h2>Game Over 💔</h2>
+    <p>Your Final Score: <span id="finalScore">0</span></p>
+    <button onclick="restartGame()">Play Again</button>
+    <button onclick="exit()">exit</button>
+  </div>
+
+<script>
+  const gameArea = document.getElementById("gameArea");
+  const scoreDisplay = document.getElementById("score");
+  const livesDisplay = document.getElementById("lives");
+  const gameOverScreen = document.getElementById("gameOverScreen");
+  const finalScore = document.getElementById("finalScore");
+  const levelBar = document.getElementById("levelBar");
+  const levelLabel = document.getElementById("levelLabel");
+  let score = 0;
+  let lives = 5;
+  let isGameOver = false;
+  const username = "{{ username }}"; 
+  const gameName = "Emoji Tap Game";
+
+  const emojis = [
+    { type: "happy", src: "/static/images/happy1.png" },
+    { type: "happy", src: "/static/images/happy2.png" },
+    { type: "happy", src: "/static/images/happy3.png" },
+    { type: "happy", src: "/static/images/happy4.png" },
+    { type: "masti", src: "/static/images/masti3.png" },
+    { type: "sad", src: "/static/images/sad1.png" },
+    { type: "sad", src: "/static/images/sad2.png" },
+    { type: "angry", src: "/static/images/angry.png" }
+  ];
+
+  let spawnInterval = 2000; 
+  let spawnLoop = setInterval(() => {
+    if (!isGameOver) createEmoji();
+  }, spawnInterval);
+
+  function createEmoji() {
+    if (isGameOver) return;
+
+    const emojiData = emojis[Math.floor(Math.random() * emojis.length)];
+    const emoji = document.createElement("img");
+    emoji.src = emojiData.src;
+    emoji.className = "emoji";
+    const maxX = window.innerWidth - 60;
+    const maxY = window.innerHeight - 60;
+    emoji.style.left = `${Math.random() * maxX}px`;
+    emoji.style.top = `${Math.random() * maxY}px`;
+    emoji.style.transform = "scale(1.5)";
+    emoji.style.transition = "transform 0.2s";
+
+    emoji.onclick = () => {
+      if (emojiData.type == "angry") {
+        lives--;
+      } else if (emojiData.type == "masti") {
+        score += 20;
+      } else if (emojiData.type == "sad") {
+        score -= 10;
+      } else {
+        score += 10;
+      }
+      emoji.remove();
+      updateUI();
+      adjustDifficulty(); 
+    };
+
+    setTimeout(() => {
+      if (gameArea.contains(emoji)) {
+        if (emojiData.type !== "angry" && emojiData.type !== "sad") {
+          lives--;
+          updateUI();
+        }
+        emoji.remove();
+      }
+    }, 1800);
+
+    gameArea.appendChild(emoji);
+  }
+
+  function updateUI() {
+    scoreDisplay.textContent = score;
+    livesDisplay.textContent = lives;
+    finalScore.textContent = score;
+
+    if (lives <= 0) {
+      isGameOver = true;
+      gameOverScreen.style.display = "block";
+      clearInterval(spawnLoop);
+      let finalScore = score; 
+      sendScoreToBackend(username, gameName, score);
+    }
+  }
+
+  function adjustDifficulty() {
+    if (score % 10 === 0 && score !== 0 && spawnInterval > 700) {
+      spawnInterval -= 100; 
+      clearInterval(spawnLoop);
+      spawnLoop = setInterval(() => {
+        if (!isGameOver) createEmoji();
+      }, spawnInterval);
+    }
+  }
+  function sendScoreToBackend(username, gameName, score) {
+    fetch('/update_score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            username: username,
+            game_name: gameName,
+            score: score
+        })
+    })
+    .then(res => res.json())
+    .then(data => console.log("Score update:", data))
+    .catch(err => console.error(err));
+}
+
+  function restartGame() {
+    score = 0;
+    lives = 5;
+    isGameOver = false;
+    gameOverScreen.style.display = "none";
+    document.querySelectorAll(".emoji").forEach(e => e.remove());
+    spawnInterval = 2000;
+    clearInterval(spawnLoop);
+    spawnLoop = setInterval(() => {
+      if (!isGameOver) createEmoji();
+    }, spawnInterval);
+    updateUI();
+  }
+
+  function exit() {
+    window.location.href = "happy";
+  }
+
+  updateUI();
+</script>
+</body>
+</html>

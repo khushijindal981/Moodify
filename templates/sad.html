@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sad Mood - Moodify</title>
+  <link rel="stylesheet" href="{{url_for('static', filename='css/moodstyle.css')}}" />
+</head>
+<body class="sad">
+  <div class="container">
+    <h2>😢 Welcome to the Sad Zone</h2>
+    <p class="mood-quote">"It’s okay to feel sad. Healing takes time, and we’re here for you."</p>
+
+    <div class="game-grid">
+      <div class="game-card" onclick="chat()">
+        <img src="{{url_for('static', filename='images/chatbot.jpg')}}" alt="Chatbot" />
+        <h3 style="color: rgba(35, 62, 112, 0.58);">ChatBot</h3>
+      </div>
+      <div class="game-card" onclick="touchHeal()">
+        <img src="{{url_for('static', filename='images/lets-heal.jpg')}}" alt="Let’s Heal" />
+        <h3 style="color: rgba(35, 62, 112, 0.58);">Let’s Heal</h3>
+      </div>
+      <div class="game-card" onclick="flyingChicks()">
+        <img src="{{url_for('static', filename='images/chicks.jpg')}}" alt="Let’s Heal" />
+        <h3 style="color: rgba(35, 62, 112, 0.58);">Play With Me</h3>
+      </div>
+    </div>
+
+    <button onclick="emotion()" class="back-btn">🔙 Back to Mood Selection</button>
+  </div>
+  <script>
+    function touchHeal() {
+      window.location.href = 'touch'; 
+    }
+
+    function emotion() {
+      window.location.href = 'emotion';
+    }
+
+    function flyingChicks() {
+      window.location.href = 'flying-chicks'; 
+    }
+
+    function chat() {
+      window.location.href = 'chat'; 
+    }
+  </script>
+</body>
+</html>

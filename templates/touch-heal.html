@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🖐 Touch & Heal</title>
+  <link rel="stylesheet" href="{{url_for('static', filename='css/touch-heal.css')}}" />
+</head>
+<body>
+  <div class="heal-container">
+    <h1>🖐 Touch & Heal</h1>
+    <p>Touch or move your cursor slowly to start healing...</p>
+
+    <div class="heart-box" id="heartBox">
+      <img id="brokenHeart" src="{{url_for('static', filename='images/broken-heart.png')}}" alt="Broken Heart" />
+      <img id="healedHeart" src="{{url_for('static', filename='images/heart.png')}}" alt="Healed Heart" />
+    </div>
+    <div class="healing-quotes" id="healingQuotes">“Every wound heals, just give it time.”</div>
+    <p class="healingQuote" id="healingText">💖 Healing starts with you.</p>
+
+    <a class="back-btn" href="sad">← Back to Sad Mood</a>
+  </div>
+
+  <script src="{{url_for('static', filename='js/touch-heal.js')}}"></script>
+</body>
+</html>

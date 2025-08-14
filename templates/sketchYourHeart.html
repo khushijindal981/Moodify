@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sketch Your Heart</title>
+  <link rel="stylesheet" href="{{url_for('static', filename='css/sketch.css')}}" />
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 Sketch Your Heart</h1>
+    
+    <div class="toolbar">
+      <label for="brushStyle">Brush Style:</label>
+      <select id="brushStyle">
+        <option value="simple">Simple</option>
+        <option value="dotted">Dotted</option>
+        <option value="glow">Glow</option>
+        <option value="calligraphy">Calligraphy</option>
+      </select>
+
+      <label for="colorPicker">Color:</label>
+      <input type="color" id="colorPicker" value="" />
+
+      <button onclick="doneDrawing()">✨ Done Drawing</button>
+      <button onclick="clearCanvas()">🧹 Clear</button>
+      <button id="eraseBtn">Erase</button>
+      <button onclick="exitPage()">❌ Exit</button>
+    </div>
+
+    <canvas id="drawingCanvas" width="900" height="1000"></canvas>
+  </div>
+  <script>
+    const username = "{{ username }}"; 
+    const gameName = "Sketch Your Heart";
+  </script>
+  <script src="{{url_for('static', filename='js/sketch.js')}}"></script>
+</body>
+</html>

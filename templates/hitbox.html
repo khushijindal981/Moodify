@@ -1,0 +1,199 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HotBox – Anger Release Game</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: url('/static/images/destructivebg.jpg')  no-repeat center;;
+      padding: 20px;
+      color:aliceblue;
+    }
+    #angerInput {
+     width: 300px;
+    height: 100px;
+    font-size: 16px;
+   padding: 10px;
+    margin-bottom: 10px;
+    }
+
+    #boxContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 20px;
+    }
+
+    .box {
+    width: 150px;
+    height: 150px;
+    position: relative;
+    border: 2px solid #444;
+    background-color: #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .box img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+
+  .anger-text {
+    z-index: 1;
+    color: white;
+    font-weight: bold;
+    text-shadow: 1px 1px 3px #000;
+  }
+
+  .tools {
+    margin-top: 20px;
+  }
+
+  .tools img {
+    width: 70px;
+    height: 70px;
+    margin: 0 10px;
+    cursor: grab;
+  }
+
+  .btn {
+    margin-top: 20px;
+    padding: 10px ;
+    font-size: 16px;
+    display: none;
+  }
+ 
+</style>
+</head>
+<body >
+  <div class="game-container">
+    <h2>Enter things that make you angry</h2>
+    <textarea id="angerInput" placeholder="Type each reason on a new line..."></textarea><br>
+    <button onclick="createBoxes()">🔥 Start Releasing</button>  
+    <div class="tools">
+      <h3>Drag and Drop tools to box</h3>
+      <img src="{{url_for('static',filename='images/hammer.png')}}" id="hammerTool" draggable="true" ondragstart="toolDragStart(event, 'hammer')">
+      <img src="{{url_for('static',filename='images/bomb.png')}}" id="bombTool" draggable="true" ondragstart="toolDragStart(event, 'bomb')">
+      <img src="{{url_for('static',filename='images/fire.png')}}" id="fireTool" draggable="true" ondragstart="toolDragStart(event, 'fire')">
+    </div>  
+    <div id="boxContainer"></div>
+    <button class="Btn" id="reliefBtn" onclick="clearBoxes()">😊 Feeling Better</button>  
+    <button class="Btn" onclick="window.location.href='/angry'">← Back to Anger Mode</button><br><br>
+  </div>
+    <button onclick="window.location.href='/angry'">Back to anger zone</button>
+  <script>
+    const username = "{{ username }}"; 
+    const gameName = "Hit Boxes";
+    const stageImages = ['static/images/crate1.png', 'static/images/crate2.png', 'static/images/crate3.png', 'static/images/crate4.png', 'static/images/crate5.png', 'static/images/crate6.png', 'static/images/crate7.png', 'static/images/crate8.png','static/images/crate-explode-final.png'];
+    const fireStages = ['static/images/crate-blue.png', 'static/images/crate-red.png'];
+    const explodeFrames = ['static/images/explode1.png', 'static/images/explode2.png', 'static/images/explode3.png', 'static/images/explode4.png'];
+
+    let selectedTool = '';
+    let dragStartTime = 0;
+
+    function toolDragStart(e, tool) {
+      selectedTool = tool;
+      dragStartTime = Date.now();
+      e.dataTransfer.setData("text/plain", tool);
+    }
+
+    function createBoxes() {
+      const container = document.getElementById("boxContainer");
+      const lines = document.getElementById("angerInput").value.trim().split("\n");
+      container.innerHTML = "";
+      document.getElementById("reliefBtn").style.display = "none";
+
+      lines.forEach(text => {
+        if (text.trim() !== "") {
+          const box = document.createElement("div");
+          box.className = "box";
+          box.setAttribute("data-hits", "0");
+          box.setAttribute("data-fire", "0");
+          box.setAttribute("data-destroyed", "false");
+
+          box.innerHTML = `
+            <img src="${stageImages[0]}" class="box-image" />
+            <div class="anger-text">${text}</div>
+          `;
+
+          box.addEventListener("dragover", e => e.preventDefault());
+          box.addEventListener("drop", e => handleDrop(e, box));
+
+          container.appendChild(box);
+        }
+      });
+    }
+
+    function handleDrop(e, box) {
+      e.preventDefault();
+      const tool = selectedTool;
+      const timeHeld = Date.now() - dragStartTime;
+      const img = box.querySelector(".box-image");
+
+      if (tool === 'hammer') {
+        let hits = parseInt(box.getAttribute("data-hits"));
+        const forceLevel = timeHeld > 1500 ? 2 : (timeHeld > 500 ? 1 : 0);
+        hits += forceLevel + 1;
+        if (hits >= stageImages.length) hits = stageImages.length - 1;
+        img.src = stageImages[hits];
+        box.setAttribute("data-hits", hits);
+      }
+
+      if (tool === 'fire') {
+        let fireHits = parseInt(box.getAttribute("data-fire")) + 1;
+        if (fireHits === 3) img.src = fireStages[0];
+        if (fireHits >= 5) img.src = fireStages[1];
+        box.setAttribute("data-fire", fireHits);
+      }
+
+      if (tool === 'bomb') {
+        playExplosionAnimation(box, img);
+        box.setAttribute("data-destroyed", "true");
+      }
+
+      checkAllBoxes();
+    }
+
+    function playExplosionAnimation(box, img) {
+      let frame = 0;
+      const interval = setInterval(() => {
+        if (frame < explodeFrames.length) {
+          img.src = explodeFrames[frame];
+          frame++;
+        } else {
+          clearInterval(interval);
+          img.src = stageImages[stageImages.length - 1];
+        }
+      }, 100);
+    }
+
+    function checkAllBoxes() {
+      const boxes = document.querySelectorAll(".box");
+      let damaged = 0;
+      boxes.forEach(box => {
+        if (box.getAttribute("data-hits") >= stageImages.length - 1 || box.getAttribute("data-destroyed") === "true") {
+          damaged++;
+        }
+      });
+      if (damaged === boxes.length) {
+        document.getElementById("reliefBtn").style.display = "inline-block";
+      }
+    }
+
+    function clearBoxes() {
+      document.getElementById("boxContainer").innerHTML = "";
+      document.getElementById("reliefBtn").style.display = "none";
+      alert("You released your anger! 😊... Take a deep braeth");
+    }
+  </script>
+  </body>
+</html>

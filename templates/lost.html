@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lost Mood - Moodify</title>
+  <link rel="stylesheet" href="{{url_for('static', filename='css/moodstyle.css')}}" />
+</head>
+<body class="lost">
+  <div class="container">
+    <h2>😔 Welcome to the Lost Zone</h2>
+    <p class="mood-quote">"Sometimes getting lost is the first step to finding yourself."</p>
+
+    <div class="game-grid">
+      <div class="game-card" onclick="lostIsland()">
+        <img src="{{url_for('static', filename='images/lost-island.jpg')}}" alt="Lost Island Survivor" />
+        <h3>Lost Island Survivor</h3>
+      </div>
+      <div class="game-card" onclick="puzzleMeIn()">
+        <img src="{{url_for('static', filename='images/puzzle.jpg')}}" alt="Puzzle Me In" />
+        <h3>Puzzle Me In</h3>
+      </div>
+    </div>
+
+    <button onclick="emotion()" class="back-btn">🔙 Back to Mood Selection</button>
+  </div>
+  <script>
+    function lostIsland() {
+      window.location.href = "lost_island"; 
+    }
+
+    function puzzleMeIn() {
+      window.location.href = "puzzle"; 
+    }
+
+    function emotion() {
+      window.location.href = "emotion"; 
+    }
+  </script>
+</body>
+</html>

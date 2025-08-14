@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smash colors</title>
+  <style>
+    * { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    }
+    html, body { 
+    width: 100%; 
+    height: 100%; 
+    overflow: hidden; 
+    background: #111; 
+    }
+    canvas { display: block; }
+    #scoreBoard {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-size: 22px;
+      font-family: Arial, sans-serif;
+      z-index: 10;
+    }
+    #gameOverScreen {
+      display: none;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      color: white;
+      font-family: Arial;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 20;
+    }
+    #gameOverScreen button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="container" >
+  <div id="scoreBoard">Score: <span id="score">0</span> | Lives: <span id="lives">5</span></div>
+  <canvas id="gameCanvas"></canvas>
+  <div id="gameOverScreen">
+    <h1>Game Over</h1>
+    <p>Final Score: <span id="finalScore"></span></p>
+    <button onclick="location.reload()">Play Again</button>
+    <button onclick="window.location.href='/angry'">Back to Home</button>
+  </div>
+  </div>
+  <script>
+    const username = "{{ username }}"; 
+    const gameName = "Smash Colors";
+    window.onload = () => {
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+      const scoreEl = document.getElementById("score");
+      const livesEl = document.getElementById("lives");
+      const gameOverScreen = document.getElementById("gameOverScreen");
+      const finalScoreEl = document.getElementById("finalScore");
+
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      window.addEventListener("resize", () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+
+      let score = 0;
+      let lives = 5;
+      let gameOver = false;
+      let fruits = [];
+      let mouse = { x: 0, y: 0, isDown: false };
+
+      canvas.addEventListener("pointerdown", e => {
+        mouse.isDown = true;
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+      });
+
+      canvas.addEventListener("pointermove", e => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+      });
+
+      canvas.addEventListener("pointerup", () => {
+        mouse.isDown = false;
+      });
+
+      class Fruit {
+        constructor(x, y, vx, vy, color) {
+          this.x = x;
+          this.y = y;
+          this.vx = vx;
+          this.vy = vy;
+          this.gravity = 0.18;
+          this.radius = 30;
+          this.color = color;
+          this.sliced = false;
+        }
+
+        update() {
+          this.vy += this.gravity;
+          this.x += this.vx;
+          this.y += this.vy;
+        }
+
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fillStyle = this.color;
+          ctx.fill();
+        }
+
+        isHit(px, py) {
+          return Math.hypot(this.x - px, this.y - py) < this.radius;
+        }
+      }
+
+      function spawnFruit() {
+        const colors = ["red", "yellow", "lime", "cyan", "magenta", "orange", "purple", "pink"];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const x = Math.random() * canvas.width;
+        const vx = Math.random() * 4 - 2;
+        const vy = - (15 + Math.random() *1);
+        fruits.push(new Fruit(x, canvas.height + 40, vx, vy, color));
+      }
+
+      function gameLoop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (mouse.isDown) {
+          ctx.beginPath();
+          ctx.arc(mouse.x, mouse.y, 8, 0, Math.PI * 2);
+          ctx.fillStyle = "white";
+          ctx.fill();
+        }
+
+        for (let i = fruits.length - 1; i >= 0; i--) {
+          const f = fruits[i];
+          f.update();
+          f.draw();
+
+          if (!f.sliced && mouse.isDown && f.isHit(mouse.x, mouse.y)) {
+            f.sliced = true;
+            score++;
+            scoreEl.textContent = score;
+            fruits.splice(i, 1);
+            continue;
+          }
+
+          if (f.y > canvas.height + f.radius) {
+            if (!f.sliced) {
+              lives--;
+              livesEl.textContent = lives;
+              if (lives <= 0) {
+                gameOver = true;
+                finalScoreEl.textContent = score;
+                gameOverScreen.style.display = "flex";
+                let finalScore = score; 
+                sendScoreToBackend(username, gameName, finalScore);
+                return;
+              }
+            }
+            fruits.splice(i, 1);
+          }
+        }
+
+        if (!gameOver) requestAnimationFrame(gameLoop);
+      }
+
+      let spawnInterval = 2000;
+      let minInterval = 400;
+      function dynamicSpawn() {
+        if (!gameOver) {
+          spawnFruit();
+          spawnInterval = Math.max(minInterval, spawnInterval - 50);
+          setTimeout(dynamicSpawn, spawnInterval);
+        }
+      }
+      gameLoop();
+      dynamicSpawn();
+    };
+    function sendScoreToBackend(username, gameName, score) {
+    fetch('/update_score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            username: username,
+            game_name: gameName,
+            score: score
+        })
+    })
+    .then(res => res.json())
+    .then(data => console.log("Score update:", data))
+    .catch(err => console.error(err));
+  }
+  
+  </script>
+</body>
+</html>

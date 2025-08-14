@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chick Bounce</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Comic Sans MS', sans-serif;
+    }
+    #gameContainer {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: url('static/images/background4.jpg') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    #score {
+      position: absolute;
+      top: 2vh;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 5vw;
+      color: #333;
+      z-index: 10;
+    }
+
+    #chick {
+      position: absolute;
+      width: 8vw;
+      height: 10vh;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    #trampoline {
+      position: absolute;
+      bottom: 12vh;
+      width: 20vw;
+      max-width: 550px;
+      pointer-events: none;
+    }
+    #trampoline img{
+      width: 100%;
+      height: 100%;
+    }
+  
+    #gameOverScreen {
+      display: none;
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      background: #fff;
+      padding: 20px 40px;
+      border: 2px solid #333;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      z-index: 99;
+    }
+
+    #gameOverScreen h1 {
+      font-size: 6vw;
+      margin-bottom: 20px;
+      color: red;
+    }
+
+    #gameOverScreen button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    #countdown {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 10vw;
+      font-weight: bold;
+      color: #ff9900;
+      z-index: 100;
+    }
+
+    @media (max-width: 600px) {
+      #chick { width: 25vw; }
+      #trampoline { width: 40vw; }
+      #score { font-size: 7vw; }
+      #gameOverScreen h1 { font-size: 10vw; }
+      #countdown { font-size: 16vw; }
+    }
+  </style>
+</head>
+<body>
+  <div id="gameContainer">
+  <div id="score">Score: 0</div>
+  <img id="chick" src="{{url_for('static', filename='images/normalchick.png')}}"/>
+  <img id="trampoline" src="{{url_for('static', filename='images/trampoline.png')}}" />
+  <div id="gameOverScreen">
+    <h1>Game Over 😢</h1>
+    <button onclick="restartGame()">Play Again</button>
+    <button onclick="exit()">Exit</button>
+  </div>
+  <div id="countdown"></div>
+  </div>
+  <script>
+    const username = "{{ username }}"; 
+    const gameName = "Flying Chick";
+    const chick = document.getElementById("chick");
+    const trampoline = document.getElementById("trampoline");
+    const scoreDisplay = document.getElementById("score");
+    const gameOverScreen = document.getElementById("gameOverScreen");
+    const countdownEl = document.getElementById("countdown");
+
+    let chickX = window.innerWidth / 2;
+    let chickY = window.innerHeight / 4;
+    let velocityY = 0.1;
+    let velocityX = 2;
+    let gravity = 0.6;
+    const bouncePower = -15;
+    let score = 0;
+    let isGameOver = false;
+    let gameStarted = false;
+
+    function init() {
+      chickX = window.innerWidth / 2;
+      chickY = window.innerHeight / 4;
+      velocityY = 0.1;
+      velocityX = 2;
+      score = 0;
+      gravity = 0.6;
+      isGameOver = false;
+      gameStarted = false;
+      chick.src = "static/images/normalchick.png";
+      scoreDisplay.textContent = "Score: 0";
+      gameOverScreen.style.display = "none";
+      countdownEl.style.display = "block";
+      chick.style.left = chickX + "px";
+      chick.style.top = chickY + "px";
+      trampoline.style.left = window.innerWidth / 2 - trampoline.offsetWidth / 2 + "px";
+      startCountdown();
+    }
+
+    function startCountdown() {
+      let count = 3;
+      countdownEl.textContent = count;
+
+      const countdownInterval = setInterval(() => {
+        count--;
+        if (count > 0) {
+          countdownEl.textContent = count;
+        } else if (count === 0) {
+          countdownEl.textContent = "Go!";
+        } else {
+          clearInterval(countdownInterval);
+          countdownEl.style.display = "none";
+          gameStarted = true;
+          requestAnimationFrame(gameLoop);
+        }
+      }, 1000);
+    }
+
+    function updateGravity() {
+      gravity = 0.6 + score * 0.03;
+    }
+
+    function checkBounce() {
+      const trampTop = trampoline.offsetTop;
+      const trampLeft = trampoline.offsetLeft;
+      const trampRight = trampLeft + trampoline.offsetWidth;
+
+      const chickBottom = chickY + chick.offsetHeight;
+      const chickCenterX = chickX + chick.offsetWidth / 2;
+
+      if (
+        chickBottom >= trampTop - 10 &&
+        chickBottom <= trampTop + 60 &&
+        chickCenterX >= trampLeft &&
+        chickCenterX <= trampRight &&
+        velocityY > 0
+      ) {
+        velocityY = bouncePower;
+        velocityX = (Math.random() - 0.5) * 10;
+        score++;
+        updateGravity();
+        scoreDisplay.textContent = `Score: ${score}`;
+        chick.src = "static/images/happychick.png";
+        setTimeout(() => {
+          if (!isGameOver) chick.src = "static/images/normalchick.png";
+        }, 150);
+      }
+    }
+    function sendScoreToBackend(username, gameName, score) {
+    fetch('/update_score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            username: username,
+            game_name: gameName,
+            score: score
+        })
+    })
+    .then(res => res.json())
+    .then(data => console.log("Score update:", data))
+    .catch(err => console.error(err));
+    } 
+    function gameOver() {
+      isGameOver = true;
+      chick.src = "static/images/angrychick.png";
+      gameOverScreen.style.display = "block";
+      let finalScore = score; 
+      sendScoreToBackend(username, gameName, finalScore);
+    }
+
+    function gameLoop() {
+      if (isGameOver || !gameStarted) return;
+
+      velocityY += gravity;
+      chickY += velocityY;
+      chickX += velocityX;
+
+      if (chickY > window.innerHeight) {
+        gameOver();
+        return;
+      }
+
+      if (chickX <= 0 || chickX + chick.offsetWidth >= window.innerWidth) {
+        velocityX *= -1;
+      }
+
+      checkBounce();
+
+      chick.style.left = chickX + "px";
+      chick.style.top = (chickY + 10) + "px"; 
+      requestAnimationFrame(gameLoop);
+    }
+
+    function restartGame() {
+      init();
+    }
+
+    function followMouse(event) {
+      const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+      let newX = clientX - trampoline.offsetWidth / 2;
+      newX = Math.max(0, Math.min(newX, window.innerWidth - trampoline.offsetWidth));
+      trampoline.style.left = newX + "px";
+    }
+
+    function exit() {
+      window.location.href = "sad"; 
+    }
+
+    document.addEventListener("mousemove", followMouse);
+    document.addEventListener("touchmove", followMouse);
+
+    window.onload = init;
+  </script>
+</body>
+</html>

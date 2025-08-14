@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Anger Mode - Moodify</title>
+  <link rel="stylesheet" href="{{url_for('static', filename='css/anger.css')}}" />
+</head>
+<body class="anger-theme">
+  <div class="anger-container">
+    <h2>😡 You're feeling Angry?</h2>
+    <p>Choose a game to calm your mind and chill your vibes 👇</p>
+
+    <div class="game-options">
+      <div class="game-card" onclick="chat()">
+        <img src="{{ url_for('static', filename='images/coach.jpg') }}" alt="AI Calm Coach" />
+        <div class="card-text">
+          <H3>🧠 AI Calm Down Coach</H3>
+          <p>Get calming affirmations and mental resets</p>
+        </div>
+      </div>
+
+      <div class="game-card" onclick="hitboxes()">
+        <img src="{{ url_for('static', filename='images/hotboxes.jpg') }}" alt="Hot Boxes" />
+        <div class="card-text">
+          <h3>💥 Hit Boxes</h3>
+          <p>Burst the stress away in a fun, fast game</p>
+        </div>
+      </div>
+
+      <div class="game-card" onclick="paint()">
+        <img src="{{ url_for('static', filename='images/colorsmash.jpg') }}" alt="fruit-smash" />
+        <div class="card-text">
+          <h3>Smash the Fruits</h3>
+          <p>Release your anger by tapping on Fruits</p>
+        </div>
+      </div>
+    </div>
+    
+    <a class="go-back" href="emotion">← Back to Mood Selection</a>
+  </div>
+  <script>
+    function hitboxes() {
+      window.location.href = "hitbox";
+    }
+
+    function paint() {
+      window.location.href = "smashcolors"; 
+    }
+
+    function chat() {
+      window.location.href = "chat"; 
+    }
+  </script>
+</body>
+</html>

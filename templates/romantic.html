@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Romantic Mood - Moodify</title>
+  <link rel="stylesheet" href="{{url_for('static', filename='css/moodstyle.css')}}" />
+</head>
+<body class="romantic">
+  <div class="container">
+    <h2>❤ Welcome to the Romantic Zone</h2>
+    <p class="mood-quote">"Love is the poetry of the soul."</p>
+
+    <div class="game-grid">
+      <div class="game-card" onclick="sketchYourHeart()">
+        <img src="{{url_for('static', filename='images/sketch.jpg')}}" alt="Sketch Your Heart" />
+        <h3>Sketch Your Heart</h3>
+      </div>
+      <div class="game-card" onclick="heartCatcher()">
+        <img src="{{url_for('static', filename='images/heart-catch.jpg')}}" alt="Heart Catch Game" />
+        <h3>Heart Catch Game</h3>
+      </div>
+      <div class="game-card" onclick="flappybird()">
+        <img src="{{url_for('static', filename='images/flappybird.jpg')}}" alt="Heart Catch Game" />
+        <h3>Heart Catch Game</h3>
+      </div>
+    </div>
+
+    <button class="back-btn" onclick="emotion()">🔙 Back to Mood Selection</button>
+  </div>
+  <script>
+    function emotion() {
+      window.location.href = "emotion";
+    }
+
+    function sketchYourHeart() {
+      window.location.href = "sketch"; 
+    }
+
+    function heartCatcher() {
+      window.location.href = 'heartcatch';
+    }
+    function flappybird() {
+      window.location.href = 'flappybird';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Heart Catcher</title>
+  <link rel="stylesheet" href="{{url_for('static', filename='css/heart-catcher.css')}}"/>
+</head>
+<body>
+  <div class="game-container">
+    <img src="{{url_for('static', filename='images/background.jpg')}}" alt="bg" class="bg" />
+
+    <div id="scoreBoard">
+      ❤ Score: <span id="score">0</span> 
+      💔 Missed: <span id="missed">0</span>/5
+      🏆Highest Score: <span id="highestScore">0</span>
+    </div>
+
+    <div id="basket">
+      <img src="{{url_for('static', filename='images/basket.png')}}" alt="Basket" />
+    </div>
+    <div id="levelContainer">
+      <div id="levelBar"></div>
+    </div>
+    <div id="levelLabel">Level : Beginner</div>
+    <div id="gameOverPopup" class="hidden">
+      <h2>💔 You missed 5 hearts!</h2>
+      <p>Do you want to stay or exit the game?</p>
+      <button onclick="restartGame()">Stay</button>
+      <button onclick="exitGame()">Exit</button>
+    </div>
+  </div>
+  <script>
+    const username = "{{ username }}"; 
+    const gameName = "Heart Catcher";
+  </script>
+  <script src="{{url_for('static', filename='js/heart-catcher.js')}}"></script>
+</body>
+</html>
