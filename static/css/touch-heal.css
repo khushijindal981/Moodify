@@ -1,0 +1,94 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(to right, #141e30, #243b55);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.heal-container {
+  text-align: center;
+}
+
+.heart-box {
+  position: relative;
+  width: 50vw;
+  height: 50vh;
+  margin: 20px auto;
+}
+
+.heart-box img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  top: 0;
+  left: 0;
+  transition: opacity 15s ease-in-out, transform 1.5s ease;
+}
+
+#healedHeart {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+#brokenHeart.glow {
+  animation: glowPulse 1s infinite alternate;
+}
+
+@keyframes glowPulse {
+  from {
+    filter: drop-shadow(0 0 10px rgba(255, 100, 150, 0.4));
+  }
+  to {
+    filter: drop-shadow(0 0 25px rgba(255, 150, 200, 0.8));
+  }
+}
+
+.healing-text {
+  margin-top: 10px;
+  font-style: italic;
+  font-size: 1.1rem;
+  color: #f8b195;
+  opacity: 0;
+  transition: opacity 2s ease-in-out;
+}
+
+.healing-text.show {
+  opacity: 1;
+}
+
+.back-btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 16px;
+  background-color: #f67280;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+}
+
+.back-btn:hover {
+  background-color: #c06c84;
+}
+.healing-quotes {
+  margin-top: 15px;
+  font-size: 1rem;
+  color: #ffc5d9;
+  font-style: italic;
+  opacity: 0;
+  transition: opacity 1s ease;
+  min-height: 30px;
+}
+
+.healing-quotes.show {
+  opacity: 1;
+}
+
