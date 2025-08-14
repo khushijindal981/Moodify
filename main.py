@@ -39,7 +39,7 @@ class Notes(db.Model):
 @app.route('/')
 def login():
     return render_template("index.html")
-
+ 
 @app.route('/register', methods=['GET','POST']) 
 def register():
     if(request.method == 'POST'):
@@ -222,4 +222,5 @@ def get_scores():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
